@@ -2,7 +2,6 @@ import base64
 import json
 import re
 
-
 def Split_The_IPs(listofip):
     output = []
     for ip in listofip:
@@ -78,3 +77,6 @@ config_str = input("Enter Config: ")
 
 # Call the function to update and save configurations
 update_configs(config_str, ips)
+
+
+
