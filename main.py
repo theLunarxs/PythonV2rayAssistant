@@ -1,6 +1,47 @@
-import base64
 import json
-import re
+from cloudflare import CloudflareDNSManager
+from ConfigUpdater import V2RayConfigUpdater
+import os
+
+
+def IPListLoader(file_path):
+    ips = []
+    with open(file_path, "r+") as file:
+        user_data = json.load(file)
+    path_to_ips = user_data.get("IPPath") if "IPPath" in user_data else GetIPPath(file_path)
+    with open(path_to_ips, "r+") as IPFile:
+        ips.append(Split_The_IPs([line.strip() for line in IPFile]))
+    return ips
+
+
+def DestinationPathLoader(file_path):
+    with open(file_path, "r+") as file:
+        user_data = json.load(file)
+    path_to_save = user_data.get("SaveLocation") if "SaveLocation" in user_data else GetSaveLocation(file_path)
+    return path_to_save
+
+
+def GetIPPath(file_path):
+    path_to_ips = input("Where is the IP file?Enter full directory \n   e.g:D:/IPs/IPList.txt\n ")
+    print("You can change This Address in Paths.json")
+    content = {
+        "IPPath": path_to_ips
+    }
+    with open(file_path, "w") as file:
+        json.dump(content, file)
+    return path_to_ips
+
+
+def GetSaveLocation(file_path):
+    path_to_save = input("Where do you want the Results to be saved at?Enter full Directory\n   e.g:D:/IPs\n ")
+    print("You can change This Address in Paths.json")
+    with open(file_path, "r+") as file:
+        content = json.load(file)
+    content["SaveLocation"] = path_to_save
+    with open(file_path, "w") as file:
+        json.dump(content, file)
+    return path_to_save
+
 
 def Split_The_IPs(listofip):
     output = []
@@ -10,73 +51,31 @@ def Split_The_IPs(listofip):
     return output
 
 
-def update_vmess_address(config, ip):
-    config_copy = config.copy()
-    config_copy['add'] = ip
-    return config_copy
+choice = input("What do you intend to do? \n    1_ Update V2ray Config\n    2_Change Cloudflare DNS Record IP\n"
+               "    Enter Here: ")
+processDone = False
+while not processDone:
+    if choice == "1":
+        cwd = os.getcwd()
+        file_path = os.path.join(cwd, "Paths.json")
+        if not os.path.isfile(file_path):
+            GetIPPath(file_path)
+            GetSaveLocation(file_path)
+        ips = IPListLoader(file_path)
+        dest = DestinationPathLoader(file_path)
+        configUpdater = V2RayConfigUpdater(ips)
+        config = input("Please Enter Your Vmess/Vless Config:\n ")
+        updatedconfigs = configUpdater.update_configs([config])
+        with open(dest + "result.txt", "w") as file:
+            for updated_config in updatedconfigs:
+                file.write("\n".join(updated_config))
+        processDone = True
 
-
-def update_vless_address(vless_config, new_ip):
-    # Define a regular expression pattern to match the VLESS URL structure
-    vless_pattern = r'^(vless://)?([\w-]+)@([\d.]+):(\d+)\?([^#]*)#(.*)$'
-
-    # Use re.search to find the VLESS URL components
-    match = re.search(vless_pattern, vless_config)
-
-    if match:
-        prefix = match.group(1) if match.group(1) else ''
-        username = match.group(2)
-        port = match.group(4)
-        fragment_identifier = match.group(6)
-
-        new_config = f'{prefix}{username}@{new_ip}:{port}?{fragment_identifier}'
-        return new_config
-    else:
-        print("Invalid VLESS URL format")
-        return vless_config
-
-
-def update_configs(config_str, ips):
-    if config_str.startswith('vmess://'):
-        config_bytes = base64.urlsafe_b64decode(config_str.split('//', 1)[1] + '=' * 3)
-        config_json = config_bytes.decode('utf-8')
-        config = json.loads(config_json)
-        updated_configs = [update_vmess_address(config, ip) for ip in ips]
-        encoded_configs = [
-            f'vmess://{base64.urlsafe_b64encode(json.dumps(updated_config).encode()).decode().rstrip("=")}'
-            for updated_config in updated_configs]
-        output_file = 'D:/v2rayfolder/Vmessfinals.txt'
-
-    elif config_str.startswith('vless://'):
-        query_and_fragment = config_str.split('?', 1)[1]
-        updated_configs = [update_vless_address(config_str, ip) for ip in ips]
-
-        # Check if the prefix is already present and add it accordingly
-        encoded_configs = [f'{updated_config}?{query_and_fragment}' if updated_config.startswith('vless://') else
-                           f'vless://{updated_config}?{query_and_fragment}' for updated_config in updated_configs]
-
-        output_file = 'D:/v2rayfolder/Vlessfinals.txt'
-    else:
-        print("Unsupported configuration type")
-        return
-
-    # Write the updated configurations to the respective output file
-    with open(output_file, 'w') as f:
-        for config in encoded_configs:
-            f.write(config + '\n')
-
-    print(f"Updated configurations saved to {output_file}")
-
-
-# Read the IP addresses from the file
-with open('D:/v2rayfolder/ips.txt', 'r') as f:
-    ips = Split_The_IPs([line.strip() for line in f])
-
-# Decode the configuration string
-config_str = input("Enter Config: ")
-
-# Call the function to update and save configurations
-update_configs(config_str, ips)
-
-
-
+    elif choice == "2":
+        cf_manager = CloudflareDNSManager()
+        cf_manager.load_credentials()
+        cf_manager.load_dns_records()
+        cf_manager.display_dns_records()
+        cf_manager.choose_dns_record()
+        cf_manager.change_dns_record_ip()
+        processDone = True

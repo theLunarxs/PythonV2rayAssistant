@@ -4,6 +4,106 @@ import requests
 import os
 
 
+class CloudflareDNSManager:
+    def __init__(self):
+        self.apikey = None
+        self.EmailAddress = None
+        self.ZoneID = None
+        self.header = None
+        self.dns_records = []
+        self.RecordToChange = None
+
+    def ip_validator(self, ip):
+        ipv4_pattern = r'^(\d{1,3}\.){3}\d{1,3}$'
+        return bool(re.match(ipv4_pattern, ip))
+
+    def load_credentials(self):
+        # Load user credentials from the "Credentials.json" file
+        current_directory = os.getcwd()
+        file_path = os.path.join(current_directory, "Credentials.json")
+
+        if os.path.isfile(file_path):
+            with open(file_path, "r") as file:
+                user_data = json.load(file)
+
+            self.apikey = user_data.get("apikey")
+            self.EmailAddress = user_data.get("EmailAddress")
+            self.ZoneID = user_data.get("ZoneID")
+        else:
+            # If the file doesn't exist, ask the user for the data
+            self.apikey = input("Enter API Key: ").strip()
+            self.EmailAddress = input("Enter your Email Address: ").strip()
+            self.ZoneID = input("Enter ZoneID: ").strip()
+
+            UserCredentials = {
+                "apikey": f"{self.apikey}",
+                "EmailAddress": f"{self.EmailAddress}",
+                "ZoneID": f"{self.ZoneID}",
+            }
+
+            # Write the user's data to the "Credentials.json" file
+            with open(file_path, "w") as file:
+                json.dump(UserCredentials, file)
+
+    def load_dns_records(self):
+        # Load DNS records from Cloudflare API
+        geturl = f"https://api.cloudflare.com/client/v4/zones/{self.ZoneID}/dns_records"
+        self.header = {
+            "Content-Type": "application/json",
+            "X-Auth-Email": self.EmailAddress,
+            "X-Auth-Key": self.apikey
+        }
+
+        apiget = requests.get(geturl, headers=self.header).text
+        api_data = json.loads(apiget)["result"]
+
+        for record in api_data:
+            record_id = record["id"]
+            content = record["content"]
+            name = record["name"]
+            recordtype = record["type"]
+
+            self.dns_records.append(DNSRecord(record_id, content, name, recordtype))
+
+    def display_dns_records(self):
+        # Display DNS records
+        counter = 1
+        print("Here's a List of your DNS Records:")
+        for record in self.dns_records:
+            print(f"    {counter}_ name: {record.name} \n       Current IP Address: {record.content} \n "
+                  f"            -----------------")
+            counter += 1
+
+    def choose_dns_record(self):
+        # Choose a DNS record to change
+        RecordToChangeIndex = int(input("Enter the Number(Index) of the Record you wish to change, e.g: '1': \n")) - 1
+        self.RecordToChange = self.dns_records[RecordToChangeIndex]
+
+    def change_dns_record_ip(self):
+        ip_received = False
+        while not ip_received:
+            new_ip = input("Enter the new IP Address: ").strip()
+            if self.ip_validator(new_ip):
+                print(f"Valid IPv4 address received: {new_ip}\n")
+                ip_received = True
+            else:
+                print(f"Invalid IPv4 address format. Please try again.")
+
+        new_info = {
+            "content": f"{new_ip}",
+            "name": f"{self.RecordToChange.name}",
+            "type": f"{self.RecordToChange.type}",
+        }
+
+        PatchURL = f"https://api.cloudflare.com/client/v4/zones/{self.ZoneID}/dns_records/{self.RecordToChange.id}"
+        response = requests.request("PATCH", PatchURL, json=new_info, headers=self.header)
+
+        if response.status_code == 200:
+            print(f"**DNS Record {self.RecordToChange.name}'s IP Changed to {new_ip} Successfully **")
+        else:
+            print(response.text)
+
+
 class DNSRecord:
     def __init__(self, RecordId, content, name, recordtype):
         self.id = RecordId
@@ -12,95 +112,21 @@ class DNSRecord:
         self.type = recordtype
 
 
-def ip_validator(ip):
-    return bool(re.match(ipv4_pattern, ip))
+if __name__ == "__main__":
+    # Create an instance of CloudflareDNSManager
+    cf_dns_manager = CloudflareDNSManager()
 
+    # Load user credentials from "Credentials.json"
+    cf_dns_manager.load_credentials()
 
-# Pattern to Validate IPV4 IP Address
-ipv4_pattern = r'^(\d{1,3}\.){3}\d{1,3}$'
+    # Load DNS records from Cloudflare API
+    cf_dns_manager.load_dns_records()
 
-# Check Whether we have User's API Address or other stuff or not
-current_directory = os.getcwd()
-file_path = os.path.join(current_directory, "Credentials.json")
+    # Display DNS records
+    cf_dns_manager.display_dns_records()
 
-# If no Data is present, we ask the user about their data.
-if not os.path.isfile(file_path):
-    apikey = input("Enter API Key: ").strip()
-    EmailAddress = input("Enter your Email Address: ").strip()
-    ZoneID = input("Enter ZoneID: ").strip()
-    UserCredentials = {
-        "apikey": f"{apikey}",
-        "EmailAddress": f"{EmailAddress}",
-        "ZoneID": f"{ZoneID}",
-    }
-    # We write their data to the disk
-    with open(file_path, "w") as file:
-        json.dump(UserCredentials, file_path)
+    # Choose a DNS record to change
+    cf_dns_manager.choose_dns_record()
 
-# Data is loaded
-UserData = json.load(file_path)
-
-# Each Variable is read from disk and prepared to be used
-apikey = UserData["apikey"]
-EmailAddress = UserData["EmailAddress"]
-ZoneID = UserData["ZoneID"]
-
-geturl = f"https://api.cloudflare.com/client/v4/zones/{ZoneID}/dns_records"
-PatchURL = f"https://api.cloudflare.com/client/v4/zones/{ZoneID}/dns_records/"
-
-header = {
-    "Content-Type": "application/json",
-    "X-Auth-Email": EmailAddress,
-    "X-Auth-Key": apikey
-}
-dns_records = []
-# We Get the List of User's Records from Cloudflare GET Endpoint
-apiget = requests.get(geturl, headers=header).text
-api_data = json.loads(apiget)["result"]
-
-# We make DNSRecord Objects from the data received based on the info we need
-for record in api_data:
-    record_id = record["id"]
-    content = record["content"]
-    name = record["name"]
-    recordtype = record["type"]
-
-    # Create new DNS Record Object
-    dns_record = DNSRecord(record_id, content, name, recordtype)
-    dns_records.append(dns_record)
-
-counter = 1
-print("Here's a List of your DNS Records:")
-# Displaying User's DNS Records
-for record in dns_records:
-    print(f"    {counter}_ name: {record.name} \n       Current IP Address: {record.content} \n "
-          f"            -----------------")
-    counter += 1
-# Asking user which Record He ( Yes I'm misogynistic, women can't do stuff like this) wants to change.
-RecordToChangeIndex = int(input("Enter the Number(Index) of the Record you wish to change, e.g: '1': \n")) - 1
-RecordToChange = dns_records[RecordToChangeIndex]
-
-ip_received = False
-
-while not ip_received:
-    new_ip = input("Enter the new IP Address: ").strip()
-
-    if ip_validator(new_ip):
-        print(f"Valid IPv4 address received: {new_ip}\n")
-        ip_received = True
-    else:
-        print(f"Invalid IPv4 address format. Please try again.")
-
-new_info = {
-    "content": f"{new_ip}",
-    "name": f"{RecordToChange.name}",
-    "type": f"{RecordToChange.type}",
-}
-# Sending PATCH request to cloudflare to change DNS Record's Info
-response = requests.request("PATCH", f"{PatchURL + RecordToChange.id}"
-                            , json=new_info, headers=header)
-
-if response.status_code == 200:
-    print(f"**DNS Record {RecordToChange.name}'s IP Changed to {new_ip} Successfully **")
-else:
-    print(response.text)
+    # Change DNS record IP
+    cf_dns_manager.change_dns_record_ip()

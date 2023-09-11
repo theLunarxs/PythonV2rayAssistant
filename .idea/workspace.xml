@@ -4,9 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c19bd98f-113d-4928-bcaf-7d5feb054c7c" name="Changes" comment="tested, prettifying and implementing dynamic">
+    <list default="true" id="c19bd98f-113d-4928-bcaf-7d5feb054c7c" name="Changes" comment="Done with this branch">
+      <change afterPath="$PROJECT_DIR$/ConfigUpdater.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cloudflare.py" beforeDir="false" afterPath="$PROJECT_DIR$/cloudflare.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -31,23 +33,23 @@
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 6
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 6
+}</component>
   <component name="ProjectId" id="2VD76xvhdnkXBm6xLIa0OS8PK5h" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "cloudflare-sync",
-    "ignore.virus.scanning.warn.message": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;trying-as-class&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;
   }
-}]]></component>
-  <component name="RunManager" selected="Python.cloudflare">
+}</component>
+  <component name="RunManager" selected="Python.main">
     <configuration name="cloudflare" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="Pythonv2raystuff" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -113,8 +115,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.cloudflare" />
         <item itemvalue="Python.main" />
+        <item itemvalue="Python.cloudflare" />
         <item itemvalue="Python.tst" />
         <item itemvalue="Python.main" />
         <item itemvalue="Python.tst" />
@@ -138,11 +140,20 @@
       <option name="project" value="LOCAL" />
       <updated>1694369904689</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Done with this branch">
+      <option name="closed" value="true" />
+      <created>1694374996707</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1694374996707</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="tested, prettifying and implementing dynamic" />
-    <option name="LAST_COMMIT_MESSAGE" value="tested, prettifying and implementing dynamic" />
+    <MESSAGE value="Done with this branch" />
+    <option name="LAST_COMMIT_MESSAGE" value="Done with this branch" />
   </component>
 </project>
