@@ -1,6 +1,6 @@
 import json
 from cloudflare import CloudflareDNSManager
-from ConfigUpdater import V2RayConfigUpdater
+from ConfigUpdater import ConfigUpdater
 import os
 
 
@@ -22,7 +22,7 @@ def DestinationPathLoader(file_path):
 
 
 def GetIPPath(file_path):
-    path_to_ips = input("Where is the IP file?Enter full directory \n   e.g:D:/IPs/IPList.txt\n ")
+    path_to_ips = input("Where is the IP file?Enter full directory \n   e.g:D:/IPs/IPList.txt\n ").strip()
     print("You can change This Address in Paths.json")
     content = {
         "IPPath": path_to_ips
@@ -33,7 +33,7 @@ def GetIPPath(file_path):
 
 
 def GetSaveLocation(file_path):
-    path_to_save = input("Where do you want the Results to be saved at?Enter full Directory\n   e.g:D:/IPs\n ")
+    path_to_save = input("Where do you want the Results to be saved at?Enter full Directory\n   e.g:D:/IPs\n ").strip()
     print("You can change This Address in Paths.json")
     with open(file_path, "r+") as file:
         content = json.load(file)
@@ -52,23 +52,22 @@ def Split_The_IPs(listofip):
 
 
 choice = input("What do you intend to do? \n    1_ Update V2ray Config\n    2_Change Cloudflare DNS Record IP\n"
-               "    Enter Here: ")
+               "    Enter Here: ").strip()
 processDone = False
 while not processDone:
     if choice == "1":
         cwd = os.getcwd()
         file_path = os.path.join(cwd, "Paths.json")
+
         if not os.path.isfile(file_path):
             GetIPPath(file_path)
             GetSaveLocation(file_path)
         ips = IPListLoader(file_path)
         dest = DestinationPathLoader(file_path)
-        configUpdater = V2RayConfigUpdater(ips)
-        config = input("Please Enter Your Vmess/Vless Config:\n ")
-        updatedconfigs = configUpdater.update_configs([config])
-        with open(dest + "result.txt", "w") as file:
-            for updated_config in updatedconfigs:
-                file.write("\n".join(updated_config))
+
+        configUpdater = ConfigUpdater()
+        config = input("Please Enter Your Vmess/Vless Config:\n ").strip()
+        configUpdater.update_configs(config, ips, dest)
         processDone = True
 
     elif choice == "2":
