@@ -53,7 +53,7 @@ class ConfigUpdater:
         return True
 
     def update_config(self, configstr: str):
-        with open(self.IPlocation, "r+") as ipfile:
+        with open(self.IPlocation.strip('"\''), "r+") as ipfile:
             ips = self.split_the_ips([line.strip() for line in ipfile])
 
         config = Config(configstr, self.detect_config_protocol(configstr))

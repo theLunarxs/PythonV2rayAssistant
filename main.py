@@ -33,6 +33,8 @@ def get_save_location(file_path):
     print("You can change This Address in Paths.json")
     with open(file_path, "r+") as file:
         content = json.load(file)
+    if not os.path.exists(path_to_save):
+        os.mkdir(path_to_save)
     content["SaveLocation"] = path_to_save
     with open(file_path, "w") as file:
         json.dump(content, file)
@@ -50,7 +52,7 @@ def split_the_i_ps(listofip):
 processDone = False
 
 while not processDone:
-    choice = input("What do you intend to do? \n    1_ Update V2ray Config\n    2_Change Cloudflare DNS Record IP\n"
+    choice = input("What do you intend to do? \n    1_ Update V2ray Config\n    2_ Change Cloudflare DNS Record IP\n"
                    "    Enter Here: ").strip()
 
     if choice == "1":
