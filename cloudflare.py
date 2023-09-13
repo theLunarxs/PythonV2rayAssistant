@@ -14,7 +14,7 @@ class CloudflareDNSManager:
         self.RecordToChange = None
 
     @staticmethod
-    def ip_validator(self, ip):
+    def ip_validator(ip):
         ipv4_pattern = r'^(\d{1,3}\.){3}\d{1,3}$'
         return bool(re.match(ipv4_pattern, ip))
 

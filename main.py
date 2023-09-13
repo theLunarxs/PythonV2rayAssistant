@@ -4,26 +4,26 @@ from ConfigUpdater import ConfigUpdater
 import os
 
 
-def ip_list_loader(file_path):
-    with open(file_path, "r+") as file:
+def ip_list_loader(ip_file_path):
+    with open(ip_file_path, "r+") as file:
         user_data = json.load(file)
-    return user_data.get("IPPath") if "IPPath" in user_data else get_ip_path(file_path)
+    return user_data.get("IPPath") if "IPPath" in user_data else get_ip_path(ip_file_path)
 
 
-def destination_path_loader(file_path):
-    with open(file_path, "r+") as file:
+def destination_path_loader(dest_file_path):
+    with open(dest_file_path, "r+") as file:
         user_data = json.load(file)
-    path_to_save = user_data.get("SaveLocation") if "SaveLocation" in user_data else get_save_location(file_path)
+    path_to_save = user_data.get("SaveLocation") if "SaveLocation" in user_data else get_save_location(dest_file_path)
     return path_to_save
 
 
-def get_ip_path(file_path):
-    path_to_ips = input("Where is the IP file?Enter full directory \n   e.g:D:/IPs/IPList.txt\n ").strip()
+def get_ip_path(ip_file_path):
+    path_to_ips = input("Where is the IP file? Enter full directory \n   e.g:D:/IPs/IPList.txt\n ").strip()
     print("You can change This Address in Paths.json")
     content = {
         "IPPath": path_to_ips
     }
-    with open(file_path, "w") as file:
+    with open(ip_file_path, "w") as file:
         json.dump(content, file)
     return path_to_ips
 
@@ -47,10 +47,12 @@ def split_the_i_ps(listofip):
     return output
 
 
-choice = input("What do you intend to do? \n    1_ Update V2ray Config\n    2_Change Cloudflare DNS Record IP\n"
-               "    Enter Here: ").strip()
 processDone = False
+
 while not processDone:
+    choice = input("What do you intend to do? \n    1_ Update V2ray Config\n    2_Change Cloudflare DNS Record IP\n"
+                   "    Enter Here: ").strip()
+
     if choice == "1":
         cwd = os.getcwd()
         file_path = os.path.join(cwd, "Paths.json")
