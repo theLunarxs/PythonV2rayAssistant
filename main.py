@@ -4,24 +4,20 @@ from ConfigUpdater import ConfigUpdater
 import os
 
 
-def IPListLoader(file_path):
-    ips = []
+def ip_list_loader(file_path):
     with open(file_path, "r+") as file:
         user_data = json.load(file)
-    path_to_ips = user_data.get("IPPath") if "IPPath" in user_data else GetIPPath(file_path)
-    with open(path_to_ips, "r+") as IPFile:
-        ips.append(Split_The_IPs([line.strip() for line in IPFile]))
-    return ips
+    return user_data.get("IPPath") if "IPPath" in user_data else get_ip_path(file_path)
 
 
-def DestinationPathLoader(file_path):
+def destination_path_loader(file_path):
     with open(file_path, "r+") as file:
         user_data = json.load(file)
-    path_to_save = user_data.get("SaveLocation") if "SaveLocation" in user_data else GetSaveLocation(file_path)
+    path_to_save = user_data.get("SaveLocation") if "SaveLocation" in user_data else get_save_location(file_path)
     return path_to_save
 
 
-def GetIPPath(file_path):
+def get_ip_path(file_path):
     path_to_ips = input("Where is the IP file?Enter full directory \n   e.g:D:/IPs/IPList.txt\n ").strip()
     print("You can change This Address in Paths.json")
     content = {
@@ -32,7 +28,7 @@ def GetIPPath(file_path):
     return path_to_ips
 
 
-def GetSaveLocation(file_path):
+def get_save_location(file_path):
     path_to_save = input("Where do you want the Results to be saved at?Enter full Directory\n   e.g:D:/IPs\n ").strip()
     print("You can change This Address in Paths.json")
     with open(file_path, "r+") as file:
@@ -43,7 +39,7 @@ def GetSaveLocation(file_path):
     return path_to_save
 
 
-def Split_The_IPs(listofip):
+def split_the_i_ps(listofip):
     output = []
     for ip in listofip:
         if ":" in ip:
@@ -60,14 +56,15 @@ while not processDone:
         file_path = os.path.join(cwd, "Paths.json")
 
         if not os.path.isfile(file_path):
-            GetIPPath(file_path)
-            GetSaveLocation(file_path)
-        ips = IPListLoader(file_path)
-        dest = DestinationPathLoader(file_path)
+            get_ip_path(file_path)
+            get_save_location(file_path)
 
-        configUpdater = ConfigUpdater()
+        ips = ip_list_loader(file_path)
+        destination_path = destination_path_loader(file_path)
+
         config = input("Please Enter Your Vmess/Vless Config:\n ").strip()
-        configUpdater.update_configs(config, ips, dest)
+        configUpdater = ConfigUpdater(ips, destination_path)
+        configUpdater.update_config(config)
         processDone = True
 
     elif choice == "2":
