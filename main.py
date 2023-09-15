@@ -11,10 +11,10 @@ def ip_list_loader(ip_file_path):
     return user_data.get("IPPath") if "IPPath" in user_data else get_ip_path(ip_file_path)
 
 
-def destination_path_loader(dest_file_path):
-    with open(dest_file_path, "r+") as file:
+def destination_path_loader(destination_file_path):
+    with open(destination_file_path, "r+") as file:
         user_data = json.load(file)
-    path_to_save = user_data.get("SaveLocation") if "SaveLocation" in user_data else get_save_location(dest_file_path)
+    path_to_save = user_data.get("SaveLocation") if "SaveLocation" in user_data else get_save_location(destination_file_path)
     return path_to_save
 
 
@@ -42,20 +42,22 @@ def get_save_location(save_file_path):
     return path_to_save
 
 
-def split_the_i_ps(listofip):
+def split_the_i_ps(list_of_ip):
     output = []
-    for ip in listofip:
+    for ip in list_of_ip:
         if ":" in ip:
             output.append(ip.split(":")[0])
     return output
 
 
 processDone = False
-wehavedata = (os.path.isfile(os.path.join(os.getcwd(), 'Credentials.json')) and
-              os.path.isfile(os.path.join(os.getcwd(), 'Paths.json')))
 while not processDone:
+    we_have_data = (os.path.isfile(os.path.join(os.getcwd(), 'Credentials.json')) and
+                    os.path.isfile(os.path.join(os.getcwd(), 'Paths.json')))
+
     choice = input(f"What do you want to do? \n    1_ Update V2ray Config\n    2_ Change Cloudflare DNS Record IP\n" +
-                   f"{'    3_ Manage Settings' if wehavedata else ''}\n"
+                   f"{'    3_ Manage Settings' if we_have_data else ''}\n"
+                   f"{'    4_ Show your Info' if we_have_data else ''}\n"
                    +
                    "    Enter Here: ").strip()
 
@@ -84,6 +86,38 @@ while not processDone:
 
     elif choice == "3":
         settings = AppSettings()
+        setting_choice = input("what changes do you want to make?\n"
+                               "    1_ Change IPFile Location\n"
+                               "    2_ Change Save Destination Location\n"
+                               "    3_ Change Credentials(API Key, Email Address,Zone ID)\n"
+                               "    Enter Here: ")
 
+        if setting_choice == "1" or setting_choice == "2":
+            new_location = input("Please Enter New Location as Directory path\n"
+                                 "Enter Here: ")
+            if setting_choice == "1":
+                settings.change_ips_location(new_location)
+
+            elif setting_choice == "2":
+                settings.change_save_location(new_location)
+
+        elif setting_choice == "3":
+            credential_choice = input("What Do you want to change?\n"
+                                      "     1_ API Key\n"
+                                      "     2_ Email Address\n"
+                                      "     3_ Zone ID\n"
+                                      " Enter Here: ")
+            new_value = input("Enter the new value: ")
+            settings.change_credentials(int(credential_choice), new_value)
+        print("Value Changed Successfully")
+    elif choice == "4":
+        settings = AppSettings()
+        user_info = settings.show_user_info()
+        print("Your Info looks like this:\n"
+              f"IP File Path: {user_info.IPPath}\n"
+              f"Save Destination: {user_info.Save_Destination}\n"
+              f"API Key: {user_info.apikey}\n"
+              f"Zone ID: {user_info.ZoneID}\n"
+              f"Email Address: {user_info.EmailAddress}\n")
     else:
         print("Please Enter Valid Input")

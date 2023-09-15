@@ -4,11 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c19bd98f-113d-4928-bcaf-7d5feb054c7c" name="Changes" comment="Done with this branch, everything works">
-      <change afterPath="$PROJECT_DIR$/AppSettings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+    <list default="true" id="c19bd98f-113d-4928-bcaf-7d5feb054c7c" name="Changes" comment="AppSettings.py added, has room to progress&#10;fixed Vless regex pattern">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ConfigUpdater.py" beforeDir="false" afterPath="$PROJECT_DIR$/ConfigUpdater.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -30,6 +27,20 @@
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "theLunarxs"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings">
+    <option name="selectedUrlAndAccountId">
+      <UrlAndAccount>
+        <option name="accountId" value="e50ecced-f7d4-4fc4-b4f4-ab13bbcbbea8" />
+        <option name="url" value="https://github.com/theLunarxs/pythonv2raystuff.git" />
+      </UrlAndAccount>
+    </option>
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
@@ -170,7 +181,15 @@
       <option name="project" value="LOCAL" />
       <updated>1694374996707</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="AppSettings.py added, has room to progress&#10;fixed Vless regex pattern">
+      <option name="closed" value="true" />
+      <created>1694765596072</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1694765596072</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -187,6 +206,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="tested, prettifying and implementing dynamic" />
     <MESSAGE value="Done with this branch" />
-    <option name="LAST_COMMIT_MESSAGE" value="Done with this branch" />
+    <MESSAGE value="AppSettings.py added, has room to progress&#10;fixed Vless regex pattern" />
+    <option name="LAST_COMMIT_MESSAGE" value="AppSettings.py added, has room to progress&#10;fixed Vless regex pattern" />
   </component>
 </project>
