@@ -14,7 +14,8 @@ class ConfigUpdater:
     def __init__(self, ips_location: str, save_location: str):
         self.IPlocation = ips_location
         self.SaveLocation = save_location
-        self.vless_pattern = r'^(vless://)?([\w-]+)@([\d.]+):(\d+)\?([^#]*)#(.*)$'
+        self.vless_pattern = (r'vless://(?P<user_id>[^@]+)@(?P<address>[^:]+):(?P<port>\d+)\?(?P<parameters>[^#]+)#('
+                              r'?P<config_name>[^#]+)')
 
     @staticmethod
     def split_the_ips(list_of_ips: list) -> list:
@@ -31,24 +32,31 @@ class ConfigUpdater:
         return config_copy
 
     def update_vless_config(self, config: Config, new_ip: str) -> str:
-        match = re.search(self.vless_pattern, config.link)
+        match = re.match(self.vless_pattern, config.link)
         if match:
-            prefix = match.group(1) if match.group(1) else ''
-            username = match.group(2)
-            port = match.group(4)
-            fragment_identifier = match.group(6)
+            user_id = match.group('user_id')
+            # address = match.group('address')
+            port = match.group('port')
+            parameters = match.group('parameters')
+            config_name = match.group('config_name')
 
-            new_config = f'{prefix}{username}@{new_ip}:{port}?{fragment_identifier}'
+            new_config = f'vless://{user_id}@{new_ip}:{port}?{parameters}#{config_name}'
             return new_config
         else:
             raise ValueError("Invalid VLESS URL format")
 
     def write_config_to_disk(self, config: Config, encoded_configs: list):
-        output_file = os.path.join(self.SaveLocation, f"{config.configtype.capitalize()}final.txt")
+        # Construct the file path
+        output_file = os.path.join(self.SaveLocation, f"{config.configtype.capitalize()}final.txt").replace("\\", "/")
+
+        # Ensure the directory exists, including any necessary parent directories
+        os.makedirs(os.path.dirname(output_file), exist_ok=True)
+
         # Write the updated configurations to the respective output file
         with open(output_file, 'w') as f:
-            for config in encoded_configs:
-                f.write(config + '\n')
+            for config_line in encoded_configs:
+                f.write(config_line + '\n')
+
         print(f"Updated configurations saved to {output_file}")
         return True
 
@@ -68,13 +76,10 @@ class ConfigUpdater:
                 for updated_config in updated_configs]
 
         elif config.configtype == "vless":
-            query_and_fragment = config.link.split('?', 1)[1]
             updated_configs = [self.update_vless_config(config, ip) for ip in ips]
 
             # Check if the prefix is already present and add it accordingly
-            encoded_configs = [
-                f'{updated_config}?{query_and_fragment}' if updated_config.startswith('vless://') else
-                f'vless://{updated_config}?{query_and_fragment}' for updated_config in updated_configs]
+            encoded_configs = [f'{updated_config}' for updated_config in updated_configs]
 
         else:
             raise ValueError("Value Not Assessed")

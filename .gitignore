@@ -1,2 +1,6 @@
 Credentials.json
 Paths.json
+main.spec
+tst.py
+build/
+dist/
