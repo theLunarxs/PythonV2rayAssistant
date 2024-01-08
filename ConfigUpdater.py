@@ -14,12 +14,11 @@ class ConfigUpdater:
     def __init__(self, ips_location: str, save_location: str):
         self.IPlocation = ips_location
         self.SaveLocation = save_location
-        self.vless_pattern = (r'vless://(?P<user_id>[^@]+)@(?P<address>[^:]+):(?P<port>\d+)\?(?P<parameters>[^#]+)#('
-                              r'?P<config_name>[^#]+)')
+        self.vless_pattern = r'vless://(?P<user_id>[^@]+)@(?P<address>[^:]+):(?P<port>\d+)\?(?P<parameters>[^#]+)#(?P<config_name>[^#]+)'
 
     @staticmethod
     def split_the_ips(list_of_ips: list) -> list:
-        return [ip.split(":")[0] for ip in list_of_ips if ":" in ip]
+        return [ip.split(":")[0] if ":" in ip else ip for ip in list_of_ips]
 
     @staticmethod
     def detect_config_protocol(config_link: str) -> str:
@@ -35,7 +34,6 @@ class ConfigUpdater:
         match = re.match(self.vless_pattern, config.link)
         if match:
             user_id = match.group('user_id')
-            # address = match.group('address')
             port = match.group('port')
             parameters = match.group('parameters')
             config_name = match.group('config_name')
@@ -61,27 +59,37 @@ class ConfigUpdater:
         return True
 
     def update_config(self, configstr: str):
-        with open(self.IPlocation.strip('"\''), "r+") as ipfile:
-            ips = self.split_the_ips([line.strip() for line in ipfile])
+        try:
+            with open(self.IPlocation.strip('"\''), "r+") as ipfile:
+                ips = self.split_the_ips([line.strip() for line in ipfile])
 
-        config = Config(configstr, self.detect_config_protocol(configstr))
+            config = Config(configstr, self.detect_config_protocol(configstr))
 
-        if config.configtype == "vmess":
-            config_bytes = base64.urlsafe_b64decode(config.link.split('//', 1)[1] + '=' * 3)
-            config_json = config_bytes.decode('utf-8')
-            decoded_config = json.loads(config_json)
-            updated_configs = [self.update_vmess_config(decoded_config, ip) for ip in ips]
-            encoded_configs = [
-                f'vmess://{base64.urlsafe_b64encode(json.dumps(updated_config).encode()).decode().rstrip("=")}'
-                for updated_config in updated_configs]
+            try:
+                if config.configtype == "vmess":
+                    config_bytes = base64.urlsafe_b64decode(config.link.split('//', 1)[1] + '=' * 3)
+                    config_json = config_bytes.decode('utf-8')
+                    decoded_config = json.loads(config_json)
+                    updated_configs = [self.update_vmess_config(decoded_config, ip) for ip in ips]
+                    encoded_configs = [
+                        f'vmess://{base64.urlsafe_b64encode(json.dumps(updated_config).encode()).decode().rstrip("=")}'
+                        for updated_config in updated_configs]
+                elif config.configtype == "vless":
+                    updated_configs = [self.update_vless_config(config, ip) for ip in ips]
+                    encoded_configs = [f'{updated_config}' for updated_config in updated_configs]
+                else:
+                    raise ValueError("Invalid config type")
+            except Exception as config_error:
+                print(f"Error updating config: {str(config_error)}")
+                raise  # Reraise the exception to stop the process
 
-        elif config.configtype == "vless":
-            updated_configs = [self.update_vless_config(config, ip) for ip in ips]
+            try:
+                self.write_config_to_disk(config, encoded_configs)
+            except Exception as write_error:
+                print(f"Error writing config to disk: {str(write_error)}")
 
-            # Check if the prefix is already present and add it accordingly
-            encoded_configs = [f'{updated_config}' for updated_config in updated_configs]
-
-        else:
-            raise ValueError("Value Not Assessed")
-
-        self.write_config_to_disk(config, encoded_configs)
+        except Exception as outer_error:
+            print(f"Error during the update process: {str(outer_error)}")
+# Example usage:
+# updater = ConfigUpdater(ips_location='your_ips.txt', save_location='output_folder')
+# updater.update_config('your_config_link_here')
